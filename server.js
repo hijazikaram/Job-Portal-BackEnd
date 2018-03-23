@@ -24,7 +24,10 @@ app.use(session({ secret: 'secret', resave: true, saveUninitialized: true }));
 app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
 
-mongoose.connect('localhost');
+mongoose.connect('mongodb://admin:admin@ds123259.mlab.com:23259/jobportal');
+mongoose.connection.once('open', function() {
+  console.log('Connected');
+});
 mongoose.connection.on('error', function() {
   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
   process.exit(1);
