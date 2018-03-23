@@ -1,0 +1,24 @@
+{
+  "name": "islamic-jobs-backend",
+  "version": "1.0.0",
+  "description": "Api For Islamic Jobs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^1.0.3",
+    "body-parser": "^1.15.1",
+    "compression": "^1.6.2",
+    "express": "^4.13.4",
+    "express-flash": "0.0.2",
+    "express-session": "^1.2.1",
+    "express-validator": "^2.20.4",
+    "method-override": "^2.3.5",
+    "mongoose": "^4.4.8",
+    "morgan": "^1.7.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": "6.1.0"
+  }
+}
