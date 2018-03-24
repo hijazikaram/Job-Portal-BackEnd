@@ -33,7 +33,7 @@ mongoose.connection.on('error', function() {
   process.exit(1);
 });
 
-require('./routes/institutions.js')(app);
+require('./routes/user.js')(app);
 
 app.get('/', function (req, res, next) {
   res.send("hello");
