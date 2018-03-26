@@ -23,14 +23,22 @@ app.use(methodOverride('_method'));
 app.use(session({ secret: 'secret', resave: true, saveUninitialized: true }));
 app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
-mongoose.connect('localhost');
+mongoose.connect('mongodb://admin:admin@ds123259.mlab.com:23259/jobportal');
+mongoose.connection.once('open', function() {
+  console.log('Connected');
+});
 mongoose.connection.on('error', function() {
   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
   process.exit(1);
 });
 
-require('./routes/institutions.js')(app);
+require('./routes/user.js')(app);
 
 app.get('/', function (req, res, next) {
   res.send("hello");
