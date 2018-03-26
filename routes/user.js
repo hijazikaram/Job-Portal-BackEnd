@@ -21,18 +21,18 @@ module.exports = (app) => {
     };
     bcrypt.hash(data.password, 10, function(err, hash) {
       if (err) {
-        res.status(500).json({ error: 'Error occured while saving institution.' });
+        res.status(500).json({ error: 'Error occured while saving user.' });
       } else {
         data.password = hash;
-        const institution = new User(data);
+        const user = new User(data);
         User
           .findOne({ email: data.email })
           .then(response => {
             if (response) {
-              res.status(500).json({ error: 'A user with this email already exists.' });
+              res.status(200).json({ error: 'A user with this email already exists.' });
             } else {
-              institution.save(function (err, institution) {
-                if (err) res.status(500).json({ error: 'Validation exception' });
+              user.save(function (err, user) {
+                if (err) res.status(200).json({ error: 'Validation exception' });
                 else res.json({success: true})
               });
             }
