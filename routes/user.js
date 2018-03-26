@@ -33,10 +33,23 @@ module.exports = (app) => {
             } else {
               user.save(function (err, user) {
                 if (err) res.status(200).json({ error: 'Validation exception' });
-                else res.json({success: true})
+                else res.json({success: true, user: user})
               });
             }
           });
+      }
+    });
+  });
+
+  app.get('/api/user/:id', function (req, res) {
+    console.log(req.params.id);
+    var id = req.params.id;
+
+    User
+    .findOne({ _id: id })
+    .then(user => {
+      if (user) {
+        res.json({success: true, user: user})
       }
     });
   });
