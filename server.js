@@ -11,23 +11,24 @@ var mongoose = require('mongoose');
 
 var app = express();
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+  next();
+});
 
 app.set('port', 5000);
 app.use(compression());
 app.use(logger('dev'));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true , limit: '5mb' }));
+app.use(bodyParser.json({limit: '5mb'}));
 app.use(expressValidator());
 app.use(methodOverride('_method'));
 //todo: not safe change secret to something secret
 app.use(session({ secret: 'secret', resave: true, saveUninitialized: true }));
 app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
 
 mongoose.connect('mongodb://admin:admin@ds123259.mlab.com:23259/jobportal');
 mongoose.connection.once('open', function() {
@@ -39,6 +40,7 @@ mongoose.connection.on('error', function() {
 });
 
 require('./routes/user.js')(app);
+require('./routes/resume.js')(app);
 
 app.get('/', function (req, res, next) {
   res.send("hello");
