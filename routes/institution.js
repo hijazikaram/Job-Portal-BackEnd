@@ -9,7 +9,6 @@ module.exports = (app) => {
     password: {type: String, required: true},
     phoneNumber: String,
     address: String,
-    type: String,
     comments_enable : {type: Boolean, default: false},
     receive_newsletter: {type: Boolean, default: false},
     receive_advice: {type: Boolean, default: false}
