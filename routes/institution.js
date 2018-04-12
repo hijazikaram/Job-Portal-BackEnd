@@ -9,10 +9,10 @@ module.exports = (app) => {
     password: {type: String, required: true},
     phoneNumber: String,
     address: String,
-    expertise: String,
-    comments_enable : false,
-    receive_newsletter: false,
-    receive_advice: false
+    type: String,
+    comments_enable : {type: Boolean, default: false},
+    receive_newsletter: {type: Boolean, default: false},
+    receive_advice: {type: Boolean, default: false}
   });
     
   const Institution = mongoose.model('Institution', InstitutionSchema);
@@ -71,74 +71,74 @@ module.exports = (app) => {
       });
   });
 
-  // // Get the user with ID
-  // app.get('/api/user/:id', function (req, res) {
-  //   var id = req.params.id;
+  // Get the institution with ID
+  app.get('/api/institution/:id', function (req, res) {
+    var id = req.params.id;
 
-  //   User
-  //   .findOne({ _id: id })
-  //   .then(user => {
-  //     if (user) {
-  //       res.json({success: true, user: user})
-  //     }
-  //   });
-  // });
+    Institution
+    .findOne({ _id: id })
+    .then(institution => {
+      if (institution) {
+        res.json({success: true, institution: institution})
+      }
+    });
+  });
 
-  // // Update the user with ID
-  // app.put('/api/user/:id', function (req, res) {
-  //   var id = req.params.id;
-  //   var body = req.body;
-  //   User
-  //   .findOne({ _id: id })
-  //   .then(user => {
-  //     if (user) {
-  //       if(body.name) {
-  //         user.name = body.name;  
-  //       }
+  // Update the institution with ID
+  app.put('/api/institution/:id', function (req, res) {
+    var id = req.params.id;
+    var body = req.body;
+    Institution
+    .findOne({ _id: id })
+    .then(institution => {
+      if (institution) {
+        if(body.name) {
+          institution.name = body.name;  
+        }
         
-  //       if(body.email) {
-  //         user.email = body.email;  
-  //       }
+        if(body.email) {
+          institution.email = body.email;  
+        }
 
-  //       user.phoneNumber = body.phoneNumber;
-  //       user.address = body.address;
-  //       user.expertise = body.expertise;
-  //       user.comments_enable = body.comments_enable;
-  //       user.receive_newsletter = body.receive_newsletter;
-  //       user.receive_advice = body.receive_advice;
+        institution.phoneNumber = body.phoneNumber;
+        institution.address = body.address;
+        institution.type = body.type;
+        institution.comments_enable = body.comments_enable;
+        institution.receive_newsletter = body.receive_newsletter;
+        institution.receive_advice = body.receive_advice;
 
-  //       if(body.oldPassword) {
-  //         const result = bcrypt.compareSync(body.oldPassword, user.password);
-  //         if (result){
-  //           // Old password is correct
-  //           bcrypt.hash(body.newPassword, 10, function(err, hash) {
-  //             if (err) {
-  //               res.status(500).json({ error: 'Error occured while saving user.' });
-  //             } else {
-  //               user.password = hash;
-  //               user.save(function (err, data) {
-  //                 if(err) {
-  //                   res.status(500).send({message: "Could not update user with id " + req.params.id});
-  //                 } else {
-  //                   res.status(200).send(data);
-  //                 }
-  //               });
-  //             }
-  //           });
-  //         } else {
-  //           // Old password is not correct
-  //           res.status(200).json({ error: "Old Password is not correct." });
-  //         }
-  //       } else {
-  //         user.save(function (err, data) {
-  //           if(err) {
-  //             res.status(200).send({message: "Could not update user with id " + req.params.id});
-  //           } else {
-  //             res.status(200).send(data);
-  //           }
-  //         });
-  //       }
-  //     }
-  //   });
-  // });
+        if(body.oldPassword) {
+          const result = bcrypt.compareSync(body.oldPassword, institution.password);
+          if (result){
+            // Old password is correct
+            bcrypt.hash(body.newPassword, 10, function(err, hash) {
+              if (err) {
+                res.status(500).json({ error: 'Error occured while saving institution.' });
+              } else {
+                institution.password = hash;
+                institution.save(function (err, data) {
+                  if(err) {
+                    res.status(500).send({message: "Could not update institution with id " + req.params.id});
+                  } else {
+                    res.status(200).send(data);
+                  }
+                });
+              }
+            });
+          } else {
+            // Old password is not correct
+            res.status(200).json({ error: "Old Password is not correct." });
+          }
+        } else {
+          institution.save(function (err, data) {
+            if(err) {
+              res.status(200).send({message: "Could not update institution with id " + req.params.id});
+            } else {
+              res.status(200).send(data);
+            }
+          });
+        }
+      }
+    });
+  });
 };
