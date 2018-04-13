@@ -42,6 +42,7 @@ mongoose.connection.on('error', function() {
 require('./routes/user.js')(app);
 require('./routes/resume.js')(app);
 require('./routes/institution.js')(app);
+require('./routes/job.js')(app);
 
 app.get('/', function (req, res, next) {
   res.send("hello");
