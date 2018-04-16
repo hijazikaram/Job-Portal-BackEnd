@@ -17,6 +17,7 @@ module.exports = (app) => {
     experience: String,
     job_function: String,
 
+    company_logo : String,
     company_industry: String,
     company_name:String,
     company_email:String,
@@ -45,6 +46,7 @@ module.exports = (app) => {
       experience : req.body.experience || '',
       job_function : req.body.job_function || '',
 
+      company_logo : req.body.company_logo || '',
       company_industry : req.body.company_industry || '',
       company_name : req.body.company_name || '',
       company_email : req.body.company_email || '',
@@ -123,6 +125,7 @@ module.exports = (app) => {
         job.experience  = body.experience;
         job.job_function  = body.job_function;
 
+        job.company_logo = body.company_logo || '';
         job.company_industry  = body.company_industry;
         job.company_name  = body.company_name;
         job.company_email  = body.company_email;
