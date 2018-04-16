@@ -88,98 +88,57 @@ module.exports = (app) => {
     });
   });
 
-  // // Login User
-  // app.post('/api/user', function (req, res) {
-  //   var email = req.body.email;
-  //   var password = req.body.password;
+  // Delete the jobs with job id
+  app.delete('/api/jobs/:job_id', function (req, res) {
+    var job_id = req.params.job_id;
 
-  //   User
-  //     .findOne({ email: email})
-  //     .then(function (user) {
-        
-  //       if(!user) {
-  //         res.status(200).json({ error: 'No user with this email exists.' });
-  //       } else {
-  //         const result = bcrypt.compareSync(password, user.password);
-  //         if (result){
-  //           res.json({success: true, user: user});
-  //         } else {
-  //           res.status(200).json({ error: "Password doesn't match." });
-  //         }
-  //       }
-  //     }, function (error) {
-  //       res.status(500).json({ error: 'Error occured while logining.' });
-  //     });
-  // });
+    Job
+    .findOne({ _id: job_id })
+    .remove()
+    .then(() => {
+      res.json({success: true});
+    });
+  });
 
-  // // Get the user with ID
-  // app.get('/api/user/:id', function (req, res) {
-  //   var id = req.params.id;
 
-  //   User
-  //   .findOne({ _id: id })
-  //   .then(user => {
-  //     if (user) {
-  //       res.json({success: true, user: user})
-  //     }
-  //   });
-  // });
+  // Update the user with ID
+  app.put('/api/job/:id', function (req, res) {
+    var id = req.params.id;
+    var body = req.body;
+    Job
+    .findOne({ _id: id })
+    .then(job => {
+      if (job) {
+        job.institution_id = body.institution_id;
+        job.job_category  = body.job_category;
+        job.job_type  = body.job_type;
+        job.job_title  = body.job_title;
+        job.job_description  = body.job_description ;
+        job.location_country  = body.location_country;
+        job.location_state  = body.location_state;
+        job.salary_min  = body.salary_min;
+        job.salary_max  = body.salary_max;
+        job.salary_negotiable  = body.salary_negotiable;
+        job.application_deadline  = body.application_deadline;
+        job.experience  = body.experience;
+        job.job_function  = body.job_function;
 
-  // // Update the user with ID
-  // app.put('/api/user/:id', function (req, res) {
-  //   var id = req.params.id;
-  //   var body = req.body;
-  //   User
-  //   .findOne({ _id: id })
-  //   .then(user => {
-  //     if (user) {
-  //       if(body.name) {
-  //         user.name = body.name;  
-  //       }
-        
-  //       if(body.email) {
-  //         user.email = body.email;  
-  //       }
+        job.company_industry  = body.company_industry;
+        job.company_name  = body.company_name;
+        job.company_email  = body.company_email;
+        job.company_mobile  = body.company_mobile;
+        job.company_address  = body.company_address;
 
-  //       user.phoneNumber = body.phoneNumber;
-  //       user.address = body.address;
-  //       user.expertise = body.expertise;
-  //       user.comments_enable = body.comments_enable;
-  //       user.receive_newsletter = body.receive_newsletter;
-  //       user.receive_advice = body.receive_advice;
+        job.post_premium = body.post_premium; 
 
-  //       if(body.oldPassword) {
-  //         const result = bcrypt.compareSync(body.oldPassword, user.password);
-  //         if (result){
-  //           // Old password is correct
-  //           bcrypt.hash(body.newPassword, 10, function(err, hash) {
-  //             if (err) {
-  //               res.status(500).json({ error: 'Error occured while saving user.' });
-  //             } else {
-  //               user.password = hash;
-  //               user.save(function (err, data) {
-  //                 if(err) {
-  //                   res.status(500).send({message: "Could not update user with id " + req.params.id});
-  //                 } else {
-  //                   res.status(200).send(data);
-  //                 }
-  //               });
-  //             }
-  //           });
-  //         } else {
-  //           // Old password is not correct
-  //           res.status(200).json({ error: "Old Password is not correct." });
-  //         }
-  //       } else {
-  //         user.save(function (err, data) {
-  //           if(err) {
-  //             res.status(200).send({message: "Could not update user with id " + req.params.id});
-  //           } else {
-  //             res.status(200).send(data);
-  //           }
-  //         });
-  //       }
-  //     }
-  //   });
-  // });
+        job.save(function (err, data) {
+          if(err) {
+            res.status(500).send({message: "Could not update user with id " + req.params.id});
+          } else {
+            res.json({success: true, job: job});
+          }
+        });
+      }
+    });
+  });
 };
