@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
 
 module.exports = (app) => {
 
   const JobSchema = mongoose.Schema({
+    institution_id: String,
     job_category : String,
     job_type: String,
     job_title: String,
@@ -31,6 +31,7 @@ module.exports = (app) => {
   // Register a new user
   app.post('/api/jobs', function (req, res) {
     const data = {
+      institution_id: req.body.institution_id,
       job_category : req.body.job_category || '',
       job_type : req.body.job_type || '',
       job_title : req.body.job_title || '',
@@ -39,7 +40,7 @@ module.exports = (app) => {
       location_state : req.body.location_state || '',
       salary_min : req.body.salary_min || '',
       salary_max : req.body.salary_max || '',
-      salary_negotiable : req.body.false,
+      salary_negotiable : req.body.salary_negotiable || '',
       application_deadline : req.body.application_deadline || '',
       experience : req.body.experience || '',
       job_function : req.body.job_function || '',
@@ -58,6 +59,32 @@ module.exports = (app) => {
     job.save(function (err, job) {
       if (err) res.status(200).json({ error: 'Validation exception' });
       else res.json({success: true, job: job})
+    });
+  });
+
+  // Get the jobs with institution id
+  app.get('/api/jobs/:institution_id', function (req, res) {
+    var institution_id = req.params.institution_id;
+
+    Job
+    .find({ institution_id: institution_id })
+    .then(jobs => {
+      if (jobs) {
+        res.json({success: true, jobs: jobs});
+      }
+    });
+  });
+
+  // Get the jobs with job id
+  app.get('/api/jobsWithId/:job_id', function (req, res) {
+    var job_id = req.params.job_id;
+
+    Job
+    .findOne({ _id: job_id })
+    .then(job => {
+      if (job) {
+        res.json({success: true, job: job});
+      }
     });
   });
 
