@@ -7,6 +7,7 @@ module.exports = (app) => {
     name: {type: String, required: true},
     email: {type: String, required: true},
     password: {type: String, required: true},
+    logo : String,
     phoneNumber: String,
     address: String,
     comments_enable : {type: Boolean, default: false},
@@ -98,7 +99,8 @@ module.exports = (app) => {
         if(body.email) {
           institution.email = body.email;  
         }
-
+        
+        institution.logo = body.logo;
         institution.phoneNumber = body.phoneNumber;
         institution.address = body.address;
         institution.type = body.type;
