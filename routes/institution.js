@@ -9,14 +9,11 @@ module.exports = (app) => {
     password: {type: String, required: true},
     logo : String,
     phoneNumber: String,
-    address: String,
-    comments_enable : {type: Boolean, default: false},
-    receive_newsletter: {type: Boolean, default: false},
-    receive_advice: {type: Boolean, default: false}
+    address: String
   });
-    
+
   const Institution = mongoose.model('Institution', InstitutionSchema);
-  
+
   // Register a new institution
   app.post('/api/institutions', function (req, res) {
     const data = {
@@ -55,7 +52,7 @@ module.exports = (app) => {
     Institution
       .findOne({ email: email})
       .then(function (institution) {
-        
+
         if(!institution) {
           res.status(200).json({ error: 'No institution with this email exists.' });
         } else {
@@ -93,20 +90,17 @@ module.exports = (app) => {
     .then(institution => {
       if (institution) {
         if(body.name) {
-          institution.name = body.name;  
+          institution.name = body.name;
         }
-        
+
         if(body.email) {
-          institution.email = body.email;  
+          institution.email = body.email;
         }
-        
+
         institution.logo = body.logo;
         institution.phoneNumber = body.phoneNumber;
         institution.address = body.address;
         institution.type = body.type;
-        institution.comments_enable = body.comments_enable;
-        institution.receive_newsletter = body.receive_newsletter;
-        institution.receive_advice = body.receive_advice;
 
         if(body.oldPassword) {
           const result = bcrypt.compareSync(body.oldPassword, institution.password);

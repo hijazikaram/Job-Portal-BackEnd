@@ -8,6 +8,8 @@ module.exports = (app) => {
     job_type: String,
     job_title: String,
     job_description : String,
+    job_key_responsibilities : String,
+    job_minimum_requirements : String,
     location_country: String,
     location_state: String,
     salary_min: String,
@@ -25,9 +27,9 @@ module.exports = (app) => {
 
     post_premium: String
   });
-    
+
   const Job = mongoose.model('Job', JobSchema);
-  
+
   // Register a new user
   app.post('/api/jobs', function (req, res) {
     const data = {
@@ -36,6 +38,8 @@ module.exports = (app) => {
       job_type : req.body.job_type || '',
       job_title : req.body.job_title || '',
       job_description : req.body.job_description  || '',
+      job_key_responsibilities : req.body.job_key_responsibilities || '',
+      job_minimum_requirements : req.body.job_minimum_requirements || '',
       location_country : req.body.location_country || '',
       location_state : req.body.location_state || '',
       salary_min : req.body.salary_min || '',
@@ -88,6 +92,22 @@ module.exports = (app) => {
     });
   });
 
+
+  //Get all the jobs
+    app.get('/api/jobs', function (req, res) {
+
+      Job.find({}, function(err, jobs) {
+      var jobMap = {};
+
+      jobs.forEach(function(job) {
+        jobMap[job._id] = job;
+      });
+
+      res.send(jobMap);
+    });
+    });
+
+
   // Delete the jobs with job id
   app.delete('/api/jobs/:job_id', function (req, res) {
     var job_id = req.params.job_id;
@@ -114,6 +134,8 @@ module.exports = (app) => {
         job.job_type  = body.job_type;
         job.job_title  = body.job_title;
         job.job_description  = body.job_description ;
+        job.job_key_responsibilities = body.job_key_responsibilities;
+        job.job_minimum_requirements = body.job_minimum_requirements;
         job.location_country  = body.location_country;
         job.location_state  = body.location_state;
         job.salary_min  = body.salary_min;
@@ -129,7 +151,7 @@ module.exports = (app) => {
         job.company_mobile  = body.company_mobile;
         job.company_address  = body.company_address;
 
-        job.post_premium = body.post_premium; 
+        job.post_premium = body.post_premium;
 
         job.save(function (err, data) {
           if(err) {

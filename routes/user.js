@@ -14,9 +14,9 @@ module.exports = (app) => {
     receive_newsletter: false,
     receive_advice: false
   });
-    
+
   const User = mongoose.model('User', UserSchema);
-  
+
   // Register a new user
   app.post('/api/users', function (req, res) {
     const data = {
@@ -55,7 +55,7 @@ module.exports = (app) => {
     User
       .findOne({ email: email})
       .then(function (user) {
-        
+
         if(!user) {
           res.status(200).json({ error: 'No user with this email exists.' });
         } else {
@@ -93,11 +93,11 @@ module.exports = (app) => {
     .then(user => {
       if (user) {
         if(body.name) {
-          user.name = body.name;  
+          user.name = body.name;
         }
-        
+
         if(body.email) {
-          user.email = body.email;  
+          user.email = body.email;
         }
 
         user.phoneNumber = body.phoneNumber;
