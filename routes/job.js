@@ -94,19 +94,24 @@ module.exports = (app) => {
 
 
   //Get all the jobs
-    app.get('/api/jobs', function (req, res) {
+  app.get('/api/jobs', function (req, res) {
 
-      Job.find({}, function(err, jobs) {
-      var jobMap = {};
-
-      jobs.forEach(function(job) {
-        jobMap[job._id] = job;
-      });
-
-      res.send(jobMap);
+    Job.find({}, function(err, jobs) {
+      res.send(jobs);
     });
-    });
+  });
 
+  // Get the job with job id
+  app.get('/api/job/:job_id', function (req, res) {
+    var job_id = req.params.job_id;
+
+    Job
+    .findOne({ _id: job_id })
+    .exec()
+    .then((job) => {
+      res.json(job);
+    });
+  });
 
   // Delete the jobs with job id
   app.delete('/api/jobs/:job_id', function (req, res) {
