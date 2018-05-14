@@ -9,7 +9,11 @@ module.exports = (app) => {
     password: {type: String, required: true},
     logo : String,
     phoneNumber: String,
-    address: String
+    address: String,
+    facebook: String,
+    twitter: String,
+    google: String,
+    linkedin: String
   });
 
   const Institution = mongoose.model('Institution', InstitutionSchema);
@@ -85,6 +89,7 @@ module.exports = (app) => {
   app.put('/api/institution/:id', function (req, res) {
     var id = req.params.id;
     var body = req.body;
+    console.log(body);
     Institution
     .findOne({ _id: id })
     .then(institution => {
@@ -100,6 +105,10 @@ module.exports = (app) => {
         institution.logo = body.logo;
         institution.phoneNumber = body.phoneNumber;
         institution.address = body.address;
+        institution.facebook = body.facebook;
+        institution.twitter = body.twitter;
+        institution.google = body.google;
+        institution.linkedin = body.linkedin;
         institution.type = body.type;
 
         if(body.oldPassword) {
