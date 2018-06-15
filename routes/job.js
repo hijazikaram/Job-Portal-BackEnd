@@ -126,6 +126,26 @@ module.exports = (app) => {
   });
 
 
+  // Get job search options
+  app.get('/api/job_search_options', function (req, res) {
+    Job.find({}, function(err, jobs) {
+      var jobCategoryOptions = ["Job Category"], jobLocationOptions = ["Job Location"];
+      jobs.map(function (job) {
+        if (job.job_category && !jobCategoryOptions.includes(job.job_category)) {
+          jobCategoryOptions.push(job.job_category);
+        }
+        var job_location = job.location_state;
+        if (job_location)
+          job_location += ", ";
+        job_location += job.location_country;
+        if (job_location && !jobLocationOptions.includes(job_location)) {
+          jobLocationOptions.push(job_location);
+        }
+      });
+      res.json({jobCategoryOptions : jobCategoryOptions, jobLocationOptions : jobLocationOptions});
+    });
+  });
+
   // Update the user with ID
   app.put('/api/job/:id', function (req, res) {
     var id = req.params.id;
