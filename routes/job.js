@@ -25,7 +25,25 @@ module.exports = (app) => {
     company_mobile: String,
     company_address:String,
 
-    post_premium: String
+    post_premium: String,
+
+    created_at: Date,
+    updated_at: Date
+  });
+
+  // on every save, add the date
+  JobSchema.pre('save', function(next) {
+    // get the current date
+    var currentDate = new Date();
+
+    // change the updated_at field to current date
+    this.updated_at = currentDate;
+
+    // if created_at doesn't exist, add to that field
+    if (!this.created_at)
+      this.created_at = currentDate;
+
+    next();
   });
 
   const Job = mongoose.model('Job', JobSchema);
@@ -95,8 +113,13 @@ module.exports = (app) => {
 
   //Get all the jobs
   app.get('/api/jobs', function (req, res) {
+    var today = new Date();
+    var ago_30 = new Date(today - 1000 * 60 * 60 * 24 * 30);
 
-    Job.find({}, function(err, jobs) {
+    Job.find({ created_at: {
+      $gte: ago_30.toISOString(),
+      $lt: today.toISOString()
+    }}, function(err, jobs) {
       res.send(jobs);
     });
   });
@@ -128,7 +151,15 @@ module.exports = (app) => {
 
   // Get job search options
   app.get('/api/job_search_options', function (req, res) {
-    Job.find({}, function(err, jobs) {
+    var today = new Date();
+    var ago_30 = new Date(today - 1000 * 60 * 60 * 24 * 30);
+
+    Job.find({ created_at: {
+      $gte: ago_30.toISOString(),
+      $lt: today.toISOString()
+    }}, 
+    'job_category location_state location_country', 
+    function(err, jobs) {
       var jobCategoryOptions = ["Job Category"], jobLocationOptions = ["Job Location"];
       jobs.map(function (job) {
         if (job.job_category && !jobCategoryOptions.includes(job.job_category)) {
