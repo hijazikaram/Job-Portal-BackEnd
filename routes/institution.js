@@ -20,6 +20,7 @@ module.exports = (app) => {
 
   // Register a new institution
   app.post('/api/institutions', function (req, res) {
+    console.log("hitting");
     const data = {
       name: req.body.name || '',
       email: req.body.email || '',
