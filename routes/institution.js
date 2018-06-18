@@ -13,7 +13,8 @@ module.exports = (app) => {
     facebook: String,
     twitter: String,
     google: String,
-    linkedin: String
+    linkedin: String, 
+    availableJobs: { type: Number, default: 0 }
   });
 
   const Institution = mongoose.model('Institution', InstitutionSchema);
@@ -142,6 +143,76 @@ module.exports = (app) => {
             }
           });
         }
+      }
+    });
+  });
+
+  // Add available jobs with ID
+  app.put('/api/institutionPlusJobs/:id', function (req, res) {
+    var id = req.params.id;
+    var body = req.body;
+
+    if (body.token && parseInt(body.count)>0) {
+      // Set your secret key: remember to change this to your live secret key in production
+      // See your keys here: https://dashboard.stripe.com/account/apikeys
+      var stripe = require("stripe")("sk_test_roGywqSpiWuSSQLPrZFFrLPu");
+
+      // Token is created using Checkout or Elements!
+      // Get the payment token ID submitted by the form:
+      const token = body.token; // Using Express
+
+      stripe.charges.create({
+        amount: body.count*150,
+        currency: 'usd',
+        description: 'Available Jobs Charge',
+        source: token,
+      }, function(err, charge) {
+        if (err) {
+          res.status(200).send({message: "Stripe operation error", err: err});
+        } else {
+          Institution
+          .findOne({ _id: id })
+          .then(institution => {
+            if (institution) {
+              if (!institution.availableJobs)
+                institution.availableJobs = 0;
+              institution.availableJobs = parseInt(institution.availableJobs, 10) + parseInt(body.count, 10);
+
+              institution.save(function (err, data) {
+                if(err) {
+                  res.status(200).send({message: "Could not increase available jobs count with id " + req.params.id});
+                } else {
+                  res.status(200).send(data);
+                }
+              });
+            }
+          });
+        }
+      });
+    } else {
+      res.status(200).send({message: "Invalid request"});
+    }
+  });
+
+  // Minus available jobs with ID
+  app.put('/api/institutionMinusJobs/:id', function (req, res) {
+    var id = req.params.id;
+    var body = req.body;
+    Institution
+    .findOne({ _id: id })
+    .then(institution => {
+      if (institution) {
+        if (!institution.availableJobs)
+          institution.availableJobs = 0;
+        institution.availableJobs = parseInt(institution.availableJobs, 10) - 1;
+
+        institution.save(function (err, data) {
+          if(err) {
+            res.status(200).send({message: "Could not decrease available jobs count with id " + req.params.id});
+          } else {
+            res.status(200).send(data);
+          }
+        });
       }
     });
   });
