@@ -1,23 +1,10 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+var Institution = require('../model/institution');
+var Transaction = require('../model/transaction');
+var Job = require('../model/job');
 
 module.exports = (app) => {
-
-  const InstitutionSchema = mongoose.Schema({
-    name: {type: String, required: true},
-    email: {type: String, required: true},
-    password: {type: String, required: true},
-    logo : String,
-    phoneNumber: String,
-    address: String,
-    facebook: String,
-    twitter: String,
-    google: String,
-    linkedin: String, 
-    availableJobs: { type: Number, default: 0 }
-  });
-
-  const Institution = mongoose.model('Institution', InstitutionSchema);
 
   // Register a new institution
   app.post('/api/institutions', function (req, res) {
@@ -178,11 +165,33 @@ module.exports = (app) => {
                 institution.availableJobs = 0;
               institution.availableJobs = parseInt(institution.availableJobs, 10) + parseInt(body.count, 10);
 
-              institution.save(function (err, data) {
+              institution.save(function (err, instituion_data) {
                 if(err) {
                   res.status(200).send({message: "Could not increase available jobs count with id " + req.params.id});
                 } else {
-                  res.status(200).send(data);
+                  Job
+                  .find({ institution_id: id })
+                  .then(jobs => {
+                    if (jobs) {
+                      const data = {
+                        id : "IS" + Math.random().toString(10).substring(4, 10),
+                        institution_id : institution.id, 
+                        total : jobs.length + institution.availableJobs,
+                        used : jobs.length,
+                        remaining : institution.availableJobs
+                      };
+                      const transaction = new Transaction(data);
+                      transaction.save(function (err, transaction_data) {
+                        if (err) {
+                          res.status(200).send({message: "Transaction error"});
+                        } else {
+                          res.status(200).send(instituion_data);
+                        }
+                      });
+                    } else {
+                      res.status(200).send({message: "Posted jobs error"});
+                    }
+                  });
                 }
               });
             }
@@ -213,6 +222,19 @@ module.exports = (app) => {
             res.status(200).send(data);
           }
         });
+      }
+    });
+  });
+
+  // Get the transactions with institution id
+  app.get('/api/transactions/:institution_id', function (req, res) {
+    var institution_id = req.params.institution_id;
+
+    Transaction
+    .find({ institution_id: institution_id })
+    .then(transactions => {
+      if (transactions) {
+        res.json({success: true, transactions: transactions});
       }
     });
   });
