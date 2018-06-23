@@ -1,4 +1,7 @@
-var Job = require('../model/job');
+const Job = require('../model/job');
+const Applicatation = require('../model/application');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 module.exports = (app) => {
 
@@ -33,7 +36,7 @@ module.exports = (app) => {
     const job = new Job(data);
 
     job.save(function (err, job) {
-      if (err) res.status(200).json({ error: 'Validation exception' });
+      if (err) res.status(400).json({ error: 'Validation exception' });
       else res.json({success: true, job: job})
     });
   });
@@ -172,5 +175,24 @@ module.exports = (app) => {
         });
       }
     });
+  });
+
+  app.post('/api/jobs/:jobId/apply', upload.single('resume'), (req, res) => {
+    const { phoneNumber, email, name } = req.body;
+    const data = {
+      phoneNumber,
+      email,
+      name,
+      resumePath: req.file && req.file.path,
+      jobId: req.params.jobId
+    }
+    const application = new Applicatation(data);
+    application.save((err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(400).json({ error: 'Validation exception' });
+      }
+      else res.json({success: true, application: result})
+    })
   });
 };
