@@ -7,6 +7,13 @@ module.exports = (app) => {
 
   // Register a new user
   app.post('/api/jobs', function (req, res) {
+    console.log(req.body);
+    function addhttp(url) {
+      if (!/^(?:f|ht)tps?\:\/\//.test(url)) {
+          url = "http://" + url;
+      }
+      return url;
+    }
     const data = {
       institution_id: req.body.institution_id,
       job_category : req.body.job_category || '',
@@ -29,6 +36,10 @@ module.exports = (app) => {
       company_email : req.body.company_email || '',
       company_mobile : req.body.company_mobile || '',
       company_address : req.body.company_address || '',
+      company_facebook: req.body.company_facebook || '',
+      company_twitter: req.body.company_twitter || '',
+      company_google: req.body.company_google || '',
+      company_linkedin: req.body.company_linkedin || '',
 
       post_premium : req.body.post_premium || ''
     };
@@ -114,8 +125,8 @@ module.exports = (app) => {
     Job.find({ created_at: {
       $gte: ago_30.toISOString(),
       $lt: today.toISOString()
-    }}, 
-    'job_category location_state location_country', 
+    }},
+    'job_category location_state location_country',
     function(err, jobs) {
       var jobCategoryOptions = ["Job Category"], jobLocationOptions = ["Job Location"];
       jobs.map(function (job) {

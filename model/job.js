@@ -22,6 +22,10 @@ var JobSchema = mongoose.Schema({
     company_email:String,
     company_mobile: String,
     company_address:String,
+    company_facebook: String,
+    company_twitter: String,
+    company_google: String,
+    company_linkedin: String,
 
     post_premium: String,
 
