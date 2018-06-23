@@ -1,3 +1,4 @@
+const Application = require('../model/application');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
@@ -140,5 +141,19 @@ module.exports = (app) => {
         }
       }
     });
+  });
+
+  app.get('/api/users/:userId/applications', (req, res) => {
+    const userId = req.params.userId;
+    User
+      .findOne({ _id: userId })
+      .then(user => {
+        Application
+          .find({ userId: user._id })
+          .then(apps => res.json({ applications: apps }))
+      })
+      .catch(err => {
+        res.status(404).json({ error: `A user with id ${userId} does not exist.` })
+      })
   });
 };

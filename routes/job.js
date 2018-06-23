@@ -1,5 +1,5 @@
 const Job = require('../model/job');
-const Applicatation = require('../model/application');
+const Application = require('../model/application');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
@@ -189,21 +189,36 @@ module.exports = (app) => {
   });
 
   app.post('/api/jobs/:jobId/apply', upload.single('resume'), (req, res) => {
-    const { phoneNumber, email, name } = req.body;
+    const { phoneNumber, email, userId } = req.body;
     const data = {
       phoneNumber,
       email,
-      name,
+      userId,
       resumePath: req.file && req.file.path,
       jobId: req.params.jobId
     }
-    const application = new Applicatation(data);
+    const application = new Application(data);
     application.save((err, result) => {
       if (err) {
         console.log(err);
         res.status(400).json({ error: 'Validation exception' });
       }
       else res.json({success: true, application: result})
+    })
+  });
+
+  app.get('/api/jobs/:jobId/applications', (req, res) => {
+    const jobId = req.params.jobId;
+    Job
+    .findOne({ _id: jobId })
+    .then(job => {
+      Application
+        .find({ jobId: job._id })
+        .then(apps => res.json({ applications: apps }))
+    })
+    .catch(err => {
+      console.log(err)
+      res.status(404).json({ error: `A job with id ${jobId} does not exist.` })
     })
   });
 };
