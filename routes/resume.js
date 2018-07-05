@@ -23,9 +23,9 @@ module.exports = (app) => {
     education_background : { type : Array , "default" : [] },
     language_proficiency : { type : Array , "default" : [] }
   });
-    
+
   const Resume = mongoose.model('Resume', ResumeSchema);
-  
+
   // Register a new user
   app.post('/api/resume', function (req, res) {
     var data = req.body;
@@ -40,14 +40,13 @@ module.exports = (app) => {
   // Get the user with user ID
   app.get('/api/resume/:user_id', function (req, res) {
     var user_id = req.params.user_id;
-    console.log(user_id);
     Resume
     .findOne({ user_id: user_id })
     .then(resume => {
       if (resume) {
         res.json({success: true, resume: resume})
       } else {
-        res.json({error : 'Not Found'});  
+        res.json({error : 'Not Found'});
       }
     }, error => {
       res.json({error : 'Not Found'});

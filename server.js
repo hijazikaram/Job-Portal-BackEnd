@@ -1,15 +1,16 @@
-var express = require('express');
-var path = require('path');
-var logger = require('morgan');
-var compression = require('compression');
-var methodOverride = require('method-override');
-var session = require('express-session');
-var flash = require('express-flash');
-var bodyParser = require('body-parser');
-var expressValidator = require('express-validator');
-var mongoose = require('mongoose');
+const express = require('express');
+const path = require('path');
+const logger = require('morgan');
+const compression = require('compression');
+const methodOverride = require('method-override');
+const session = require('express-session');
+const flash = require('express-flash');
+const bodyParser = require('body-parser');
+const expressValidator = require('express-validator');
+const mongoose = require('mongoose');
+const Grid = require('gridfs-stream');
 
-var app = express();
+const app = express();
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -31,7 +32,13 @@ app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
 
 mongoose.connect('mongodb://admin:admin@ds123259.mlab.com:23259/jobportal');
+
+var gfs;
 mongoose.connection.once('open', function() {
+  var db = mongoose.connection.db;
+  var mongoDriver = mongoose.mongo;
+  gfs = new Grid(db, mongoDriver);
+  global.gfs = gfs;
   console.log('Connected');
 });
 mongoose.connection.on('error', function() {

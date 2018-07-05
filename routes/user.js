@@ -1,6 +1,8 @@
 const Application = require('../model/application');
 const mongoose = require('mongoose');
+const Bookmark = require('../model/bookmark');
 const bcrypt = require('bcrypt');
+const Job = require('../model/job');
 
 module.exports = (app) => {
 
@@ -142,17 +144,55 @@ module.exports = (app) => {
       }
     });
   });
-
+  app.get('/api/users/:userId/bookmarkedJobs', (req, res) => {
+    const userId = req.params.userId;
+    User
+      .findOne({ _id: userId })
+      .then(user => {
+        Bookmark.find({ userId: user._id })
+          .then(bookmarked => {
+            if(bookmarked){
+              const jobIds = [];
+              const jobs = bookmarked.map(bookmark => {
+                jobIds.push(bookmark.jobId);
+              });
+              Job.find({_id: {$in: jobIds}})
+                .then(bookmarkedJobs => {
+                  if (bookmarkedJobs) {
+                    res.json({ bookmarkedJobs: bookmarkedJobs });
+                  }
+                });
+            }
+          });
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(404).json({ error: `A user with id ${userId} does not exist.` })
+      })
+  });
   app.get('/api/users/:userId/applications', (req, res) => {
     const userId = req.params.userId;
     User
       .findOne({ _id: userId })
       .then(user => {
-        Application
-          .find({ userId: user._id })
-          .then(apps => res.json({ applications: apps }))
+        Application.find({ userId: user._id })
+          .then(applications => {
+            if(applications){
+              const jobIds = [];
+              const jobs = applications.map(app => {
+                jobIds.push(app.jobId);
+              });
+              Job.find({_id: {$in: jobIds}})
+                .then(appliedJobs => {
+                  if (appliedJobs) {
+                    res.json({ applications: appliedJobs });
+                  }
+                });
+            }
+          });
       })
       .catch(err => {
+        console.log(err);
         res.status(404).json({ error: `A user with id ${userId} does not exist.` })
       })
   });

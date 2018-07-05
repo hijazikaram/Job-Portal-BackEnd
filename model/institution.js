@@ -4,13 +4,14 @@ const InstitutionSchema = mongoose.Schema({
   name: {type: String, required: true},
   email: {type: String, required: true},
   password: {type: String, required: true},
-  logo : String,
+  logoId: String,
+  logoName: String,
   phoneNumber: String,
   address: String,
   facebook: String,
   twitter: String,
   google: String,
-  linkedin: String, 
+  linkedin: String,
   availableJobs: { type: Number, default: 0 }
 });
 

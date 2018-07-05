@@ -3,12 +3,17 @@ const bcrypt = require('bcrypt');
 var Institution = require('../model/institution');
 var Transaction = require('../model/transaction');
 var Job = require('../model/job');
+const multer = require('multer');
+const upload = multer({ dest: 'logo/' });
+const fs = require('fs');
+const mongose = require('mongoose');
+const ObjectId = mongose.Types.ObjectId;
+
 
 module.exports = (app) => {
 
   // Register a new institution
   app.post('/api/institutions', function (req, res) {
-    console.log("hitting");
     const data = {
       name: req.body.name || '',
       email: req.body.email || '',
@@ -75,7 +80,7 @@ module.exports = (app) => {
   });
 
   // Update the institution with ID
-  app.put('/api/institution/:id', function (req, res) {
+  app.put('/api/institution/:id', upload.single('logo'), (req, res) => {
     var id = req.params.id;
     var body = req.body;
     console.log(body);
@@ -83,6 +88,7 @@ module.exports = (app) => {
     .findOne({ _id: id })
     .then(institution => {
       if (institution) {
+        const fileId = new ObjectId();
         if(body.name) {
           institution.name = body.name;
         }
@@ -91,7 +97,7 @@ module.exports = (app) => {
           institution.email = body.email;
         }
 
-        institution.logo = body.logo;
+        // institution.logo = body.logo;
         institution.phoneNumber = body.phoneNumber;
         institution.address = body.address;
         institution.facebook = body.facebook;
@@ -100,41 +106,83 @@ module.exports = (app) => {
         institution.linkedin = body.linkedin;
         institution.type = body.type;
 
-        if(body.oldPassword) {
-          const result = bcrypt.compareSync(body.oldPassword, institution.password);
-          if (result){
-            // Old password is correct
-            bcrypt.hash(body.newPassword, 10, function(err, hash) {
-              if (err) {
-                res.status(500).json({ error: 'Error occured while saving institution.' });
-              } else {
-                institution.password = hash;
-                institution.save(function (err, data) {
-                  if(err) {
-                    res.status(500).send({message: "Could not update institution with id " + req.params.id});
-                  } else {
-                    res.status(200).send(data);
-                  }
-                });
-              }
+
+        if(req.file){
+            const writestream = gfs.createWriteStream({
+                _id: fileId
             });
-          } else {
-            // Old password is not correct
-            res.status(200).json({ error: "Old Password is not correct." });
+
+            writestream.on('close', function(savedFile) {
+              console.log(savedFile);
+                institution.logoId = savedFile._id;
+
+
+                if(body.oldPassword !== '') {
+                  const result = bcrypt.compareSync(body.oldPassword, institution.password);
+                  if (result){
+                    // Old password is correct
+                    bcrypt.hash(body.newPassword, 10, function(err, hash) {
+                      if (err) {
+                        res.status(500).json({ error: 'Error occured while saving institution.' });
+                      } else {
+                        institution.password = hash;
+                        institution.save((err, data) => {
+                          console.log(data, "2");
+                          if(err) {
+                            console.log(err);
+                            res.status(500).send({message: "Could not update institution with id " + req.params.id});
+                          } else {
+                            res.status(200).send(data);
+                          }
+                        });
+                      }
+                    });
+                  } else {
+                    // Old password is not correct
+                    res.status(200).json({ error: "Old Password is not correct." });
+                  }
+                } else {
+                  console.log("here");
+                  institution.save((err, data) => {
+                    console.log(data, "2");
+                    if(err) {
+                      res.status(200).send({message: err + req.params.id});
+                    } else {
+                      res.status(200).send(data);
+                    }
+                  });
+                }
+
+            });
+
+            // //pipe multer's temp file /uploads/filename into the stream we created above. On end deletes the temporary file.
+            fs.createReadStream("logo/" + req.file.filename)
+                .on("end", function() {
+                    fs.unlink("logo/" + req.file.filename, (err) => {
+                      console.log(err);
+                    });
+                })
+                .on("err", function() {
+                    console.log("err");
+                })
+                .pipe(writestream);
           }
-        } else {
-          institution.save(function (err, data) {
-            if(err) {
-              res.status(200).send({message: "Could not update institution with id " + req.params.id});
-            } else {
-              res.status(200).send(data);
-            }
-          });
-        }
       }
     });
   });
 
+  app.get('/api/institution/logo/:id', (req, res) => {
+    console.log(req.params.id);
+    let readstream = gfs.createReadStream({
+       _id: req.params.id
+    });
+    console.log("hitting");
+   readstream.on("error", (err) => {
+      console.log(err);
+       res.send("No image found with that title");
+   });
+   readstream.pipe(res);
+})
   // Add available jobs with ID
   app.put('/api/institutionPlusJobs/:id', function (req, res) {
     var id = req.params.id;
@@ -176,7 +224,7 @@ module.exports = (app) => {
                     if (jobs) {
                       const data = {
                         id : "IS" + Math.random().toString(10).substring(4, 10),
-                        institution_id : institution.id, 
+                        institution_id : institution.id,
                         total : jobs.length + institution.availableJobs,
                         used : jobs.length,
                         remaining : institution.availableJobs

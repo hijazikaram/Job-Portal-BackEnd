@@ -1,19 +1,16 @@
 const Job = require('../model/job');
 const Application = require('../model/application');
+const Bookmark = require('../model/bookmark');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
+const fs = require('fs');
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (app) => {
 
   // Register a new user
   app.post('/api/jobs', function (req, res) {
-    console.log(req.body);
-    function addhttp(url) {
-      if (!/^(?:f|ht)tps?\:\/\//.test(url)) {
-          url = "http://" + url;
-      }
-      return url;
-    }
     const data = {
       institution_id: req.body.institution_id,
       job_category : req.body.job_category || '',
@@ -104,6 +101,17 @@ module.exports = (app) => {
     });
   });
 
+  app.get('/api/job/getJobIds', function (req, res) {
+    var job_id = req.params.job_id;
+
+    Job
+    .findOne({ _id: job_id })
+    .exec()
+    .then((job) => {
+      res.json(job);
+    });
+  });
+
   // Delete the jobs with job id
   app.delete('/api/jobs/:job_id', function (req, res) {
     var job_id = req.params.job_id;
@@ -115,7 +123,6 @@ module.exports = (app) => {
       res.json({success: true});
     });
   });
-
 
   // Get job search options
   app.get('/api/job_search_options', function (req, res) {
@@ -147,6 +154,7 @@ module.exports = (app) => {
 
   // Update the user with ID
   app.put('/api/job/:id', function (req, res) {
+    console.log(req.file);
     var id = req.params.id;
     var body = req.body;
     Job
@@ -190,23 +198,74 @@ module.exports = (app) => {
 
   app.post('/api/jobs/:jobId/apply', upload.single('resume'), (req, res) => {
     const { phoneNumber, email, userId } = req.body;
+    var fileId = new ObjectId();
     const data = {
       phoneNumber,
       email,
       userId,
       resumePath: req.file && req.file.path,
       jobId: req.params.jobId
+    };
+    if(req.file){
+        var writestream = gfs.createWriteStream({
+            filename: req.file.filename,
+            _id: fileId
+        });
+
+        writestream.on('close', function(savedFile) {
+            data.resumeName = savedFile.filename;
+            data.resumeId = savedFile._id;
+            const application = new Application(data);
+            application.save((err, result) => {
+              if (err) {
+                console.log(err);
+                res.status(400).json({ error: 'Validation exception' });
+              }
+              else res.json({success: true, application: result})
+            })
+
+        });
+
+        // //pipe multer's temp file /uploads/filename into the stream we created above. On end deletes the temporary file.
+        fs.createReadStream("uploads/" + req.file.filename)
+            .on("end", function() {
+                fs.unlink("uploads/" + req.file.filename, (err) => {
+                  console.log(err);
+                });
+            })
+            .on("err", function() {
+                console.log("err");
+            })
+            .pipe(writestream);
+      }
+
+  });
+
+  app.get('/api/job/resume/:id', (req, res) => {
+    let readstream = gfs.createReadStream({
+       _id: req.params.id
+    });
+   readstream.on("error", function(err) {
+       res.send("No image found with that title");
+   });
+   readstream.pipe(res);
+})
+
+  app.post('/api/jobs/:jobId/bookmark', (req, res) => {
+    const { jobId, userId } = req.body;
+    const data = {
+      userId,
+      jobId
     }
-    const application = new Application(data);
-    application.save((err, result) => {
+    const bookmarkedJobs = new Bookmark(data);
+    bookmarkedJobs.save((err, result) => {
       if (err) {
         console.log(err);
         res.status(400).json({ error: 'Validation exception' });
       }
-      else res.json({success: true, application: result})
+      else res.json({success: true, bookmarkedJobs: result})
     })
   });
-
   app.get('/api/jobs/:jobId/applications', (req, res) => {
     const jobId = req.params.jobId;
     Job
@@ -217,7 +276,6 @@ module.exports = (app) => {
         .then(apps => res.json({ applications: apps }))
     })
     .catch(err => {
-      console.log(err)
       res.status(404).json({ error: `A job with id ${jobId} does not exist.` })
     })
   });
